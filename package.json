@@ -1,0 +1,36 @@
+{
+	"name": "hayalhanem-video-recommender",
+	"version": "1.0.0",
+	"description": "Hobi amaçlı geliştirilen, WhatsApp botu üzerinden kullanılabilen, Hayalhanem kanallarından video öneren servis.",
+	"main": "src/server.ts",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/server.ts",
+		"build": "tsc -p tsconfig.json",
+		"start": "node dist/server.js",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"ingest": "tsx src/youtube/cli.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/erkanpulat/hayalhanem-video-recommender.git"
+	},
+	"keywords": [],
+	"author": "Erkan Pulat",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/erkanpulat/hayalhanem-video-recommender/issues"
+	},
+	"homepage": "https://github.com/erkanpulat/hayalhanem-video-recommender#readme",
+	"dependencies": {
+		"axios": "^1.12.2",
+		"dotenv": "^17.2.2",
+		"express": "^5.1.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.3",
+		"@types/node": "^24.5.2",
+		"tsx": "^4.20.5",
+		"typescript": "^5.9.2"
+	}
+}
