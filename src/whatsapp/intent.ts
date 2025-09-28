@@ -2,22 +2,26 @@
  * Intent Detection System for Hayalhanem Video Recommender Bot
  * 
  * This module handles natural language intent detection for Turkish WhatsApp messages.
- * It analyzes user input to determine what type of content they're requesting.
+ * It analyzes user input to determine what type of content or service they're requesting.
  * 
  * Supported Intents:
- * - 'short': User wants a short video recommendation
+ * - 'short': User wants a short video recommendation (YouTube Shorts, Reels)
  * - 'long': User wants a long/detailed video recommendation  
- * - 'info': User wants information about the bot or help
+ * - 'info': User wants information about the bot, help, or developer info
+ * - 'risale': User wants to access Risale-i Nur content (Sözler collection)
  * - 'unknown': User input doesn't match any known intent
  * 
- * The system is designed to be flexible and handle various ways users might
- * express their requests in casual Turkish conversation.
+ * The system uses Turkish text normalization and flexible keyword matching
+ * to handle various ways users might express their requests in casual conversation.
  */
+
+import { normalizeText, textMatches } from '../utils/text-utils.js';
 
 const INTENT_WORDS: Record<Exclude<DetectedIntent, 'unknown'>, string[]> = {
 	info: ['bilgi', 'info', 'help', 'yardım', 'komut', 'tanıtım', 'geliştirici', 'yazılımcı', 'kimsin'],
-	short: ['kısa', 'short', 'reels'],
-	long: ['uzun', 'long', 'detaylı', 'ayrıntılı']
+	short: ['kısa', 'short', 'reels', 'kisavideo'],
+	long: ['uzun', 'long', 'detaylı', 'ayrıntılı', 'uzunvideo'],
+	risale: ['risale', 'rnk', 'külliyat'],
 };
 
 export function detectIntent(input: string | null | undefined): DetectedIntent {
@@ -27,7 +31,7 @@ export function detectIntent(input: string | null | undefined): DetectedIntent {
 	const text = normalizeText(raw);
 
 	for (const [intent, words] of Object.entries(INTENT_WORDS)) {
-		if (includesAny(text, words)) {
+		if (textMatches(text, words)) {
 			return intent as DetectedIntent;
 		}
 	}
@@ -35,26 +39,4 @@ export function detectIntent(input: string | null | undefined): DetectedIntent {
 	return 'unknown';
 }
 
-function normalizeText(s: string): string {
-	return s
-		.toLowerCase()
-		.replace(/ı/g, 'i')
-		.replace(/İ/g, 'i')
-		.replace(/ş/g, 's')
-		.replace(/ç/g, 'c')
-		.replace(/ğ/g, 'g')
-		.replace(/ö/g, 'o')
-		.replace(/ü/g, 'u')
-		.replace(/[~_*`]+/g, ' ')
-		.replace(/\s+/g, ' ')
-		.trim();
-}
-
-function includesAny(haystack: string, needles: string[]): boolean {
-	for (const n of needles) {
-		if (haystack.includes(normalizeText(n))) return true;
-	}
-	return false;
-}
-
-export type DetectedIntent = 'short' | 'long' | 'info' | 'unknown';
+export type DetectedIntent = 'short' | 'long' | 'info' | 'risale' | 'unknown';

@@ -1,12 +1,12 @@
-import { loadVideoList, pickRandom, type Variant, type VideoItem } from './store.js';
 import { detectIntent } from './intent.js';
-import {
-	introText,
-	infoBlock,
-	videoBlock,
+import { 
+	buildWelcomeMessage, 
+	buildCommandResponse,
 	unknownCommandText,
-	commandsText
+	createInfoContent
 } from './templates.js';
+import { handleRisale } from './handlers/risale.handler.js';
+import { handleVideoRequest } from './handlers/video.handler.js';
 
 // 12 hours re-introduction window
 const REINTRO_MS = 12 * 60 * 60 * 1000;
@@ -18,9 +18,9 @@ export async function handleIncoming(msg: IncomingMessage): Promise<string> {
 	const cleanText = (text ?? '').trim();
 
 	const intent = detectIntent(cleanText);
+
 	const prevSeen = lastSeen.get(from);
 	lastSeen.set(from, timestamp);
-
 	// Memory management - keep newest 500 users if over 1000
 	if (lastSeen.size > 1000) {
 		const newest500 = Array.from(lastSeen.entries())
@@ -30,60 +30,38 @@ export async function handleIncoming(msg: IncomingMessage): Promise<string> {
 		lastSeen.clear();
 		newest500.forEach(([user, ts]) => lastSeen.set(user, ts));
 	}
-
 	const isNewOrReturning = !prevSeen || (timestamp - prevSeen) >= REINTRO_MS;
 
+	// Handle all intents with proper greeting for new/returning users
 	switch (intent) {
+		case 'risale':
+			const risaleContent = await handleRisale(cleanText);
+			return isNewOrReturning 
+				? await buildWelcomeMessage(name, from, risaleContent)
+				: await buildCommandResponse(from, risaleContent);
+
 		case 'info':
-			return infoBlock();
+			const infoContent = createInfoContent();
+			return isNewOrReturning
+				? await buildWelcomeMessage(name, from, infoContent)
+				: await buildCommandResponse(from, infoContent, true);
 
 		case 'short':
-			return await handleVideoRequest('short');
+			const shortContent = await handleVideoRequest('short');
+			return isNewOrReturning
+				? await buildWelcomeMessage(name, from, shortContent)
+				: await buildCommandResponse(from, shortContent);
 
 		case 'long':
-			return await handleVideoRequest('long');
+			const longContent = await handleVideoRequest('long');
+			return isNewOrReturning
+				? await buildWelcomeMessage(name, from, longContent)
+				: await buildCommandResponse(from, longContent);
 
 		default:
 			return isNewOrReturning
-				? await createWelcomeMessage(name, from)
+				? await buildWelcomeMessage(name, from)
 				: unknownCommandText();
-	}
-}
-
-async function handleVideoRequest(variant: Variant): Promise<string> {
-	const video = await getRecommendation(variant);
-
-	if (!video) {
-		const videoType = variant === 'short' ? 'kısa' : 'uzun';
-		return `Şu an ${videoType} video bulamadım. Lütfen daha sonra tekrar deneyin.`;
-	}
-
-	return videoBlock(video);
-}
-
-async function createWelcomeMessage(name: string | undefined, from: string): Promise<string> {
-	const shortVideo = await getRecommendation('short');
-
-	const parts = [
-		await introText(name ?? '', from),
-		'',
-		shortVideo
-			? videoBlock(shortVideo)
-			: 'Şu an kısa video bulamadım. Lütfen daha sonra tekrar deneyin.',
-		'',
-		commandsText()
-	];
-
-	return parts.join('\n');
-}
-
-async function getRecommendation(variant: Variant): Promise<VideoItem | undefined> {
-	try {
-		const list = await loadVideoList(variant);
-		return list?.length ? pickRandom(list) : undefined;
-	} catch (error) {
-		console.error(`❌ Error loading ${variant} videos:`, error);
-		return undefined;
 	}
 }
 

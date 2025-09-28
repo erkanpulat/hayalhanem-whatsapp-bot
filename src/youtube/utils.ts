@@ -1,19 +1,9 @@
 import type { VideoRecord } from "./ingest.js";
+import { toISO, isoDurationToSeconds } from '../utils/date-utils.js';
 
 const SHORT_THRESHOLD_SEC = 90;
 
-export function toISO(d: number | string | Date): string {
-	return new Date(d).toISOString();
-}
-
-export function isoDurationToSeconds(iso: string | undefined | null): number {
-	const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso ?? '');
-	if (!m) return 0;
-	
-	const [, H, M, S] = m;
-	
-	return (Number(H ?? 0) * 3600) + (Number(M ?? 0) * 60) + Number(S ?? 0);
-}
+export { toISO, isoDurationToSeconds };
 
 export function isShort(durationSec: number): boolean {
 	return durationSec <= SHORT_THRESHOLD_SEC;

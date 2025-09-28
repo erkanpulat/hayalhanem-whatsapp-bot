@@ -229,7 +229,7 @@ function getChannelIds(): readonly string[] {
 	const validPattern = /^UC[a-zA-Z0-9_-]{22}$/;
 	const invalidIds = ids.filter(id => !validPattern.test(id));
 
-	if (invalidIds.length > 0) {
+	if (invalidIds.length) {
 		throw new Error(`❌ Invalid YouTube channel IDs: ${invalidIds.join(', ')}`);
 	}
 
