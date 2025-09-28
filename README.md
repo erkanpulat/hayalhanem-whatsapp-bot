@@ -1,4 +1,4 @@
-# WhatsApp Video Öneri Robotu
+# WhatsApp Hayalhanem Botu
 
 > **🚧 Beta Sürüm – Yol haritasında belirlenen özellikler geliştirilmeye devam ediliyor.**
 
@@ -42,6 +42,8 @@ WhatsApp Cloud API entegrasyonu sayesinde kullanıcılarla sohbet tabanlı etkil
 - `risale söz 18 sayfa 3` → 18. Söz’ün *3. sayfasını* açar (*anlamlar açık*)',
 - `risale söz 18 kapali` → 18. Söz’ün *1. sayfasını* açar, *anlamları gizler*',
 - `risale söz 18 sayfa 3 kapali` → 18. Söz’ün *3. sayfasını* açar, *anlamları gizler*'
+- `risale sayfa 421` → *Global 421. sayfayı* açar (*anlamlar açık - varsayılan*)',
+- `risale sayfa 421 kapali` → *Global 421. sayfayı* açar, *anlamları gizler*',
 
 ## 🧭 Yol Haritası
 
