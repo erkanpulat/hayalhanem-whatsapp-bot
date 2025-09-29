@@ -186,7 +186,7 @@ function getHourTR(d: Date): number {
  * Bot information and developer contact details
  */
 export function createInfoContent(): string {
-	const parts = [
+	return [
 		'🤖 *Ben Hayalhanem videolarını öneren ve Risale-i Nur içeriklerini paylaşan henüz test sürecinde olan bir robotum!*',
 		'',
 		'✨ Bu benim ilk ve henüz basit versiyonum. Geliştiricim tarafından geliştirilmeye devam ediyorum.',
@@ -197,12 +197,6 @@ export function createInfoContent(): string {
 		'🎬 *Yapabileceklerim:*',
 		'• Hayalhanem YouTube kanallarından 90 saniyeye kadar kısa bir video önerebilirim.',
 		'• Hayalhanem YouTube kanallarından 90 saniyeden uzun bir video önerebilirim.',
-		'• Risale-i Nur Sözler koleksiyonundan içerik paylaşabilirim.',
-		''
-	];
-
-	// Add commands section
-	parts.push(createCommandsSection());
-
-	return parts.join('\n');
+		'• Risale-i Nur Sözler koleksiyonundan içerik paylaşabilirim.'
+	].join('\n');
 }
