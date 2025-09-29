@@ -111,17 +111,17 @@ async function processMessage(
 	processedIds.add(messageId);
 
 	try {
-		const reply = await handleIncoming({
+		const { response, previewUrl } = await handleIncoming({
 			from,
 			text,
 			timestamp: timestamp * 1000, // Convert to milliseconds
 			...(contactName && { name: contactName })
 		});
-
 		await sendTextMessage({
 			to: from,
-			body: reply,
-			phoneNumberId
+			body: response,
+			phoneNumberId,
+			preview_url: previewUrl
 		});
 	} catch (error) {
 		console.error(`❌ Failed to process message ${messageId} from ${from}:`, error);

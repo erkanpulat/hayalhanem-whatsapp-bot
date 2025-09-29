@@ -1,8 +1,7 @@
 import type { VideoItem } from '../types/video.js';
+import type { MessageChunk } from '../types/whatsapp.js';
 import { sanitizeWhatsApp } from '../utils/text-utils.js';
 import { WHATSAPP_MESSAGE_MAX_LENGTH } from './api.js';
-
-export { sanitizeWhatsApp };
 
 /**
  * Get Unicode-safe character count using grapheme clusters
@@ -156,10 +155,4 @@ export function createVideoBlock(video: VideoItem): string {
 	}
 
 	return parts.join('\n');
-}
-
-interface MessageChunk {
-	text: string;
-	chunkIndex: number;
-	totalChunks: number;
 }

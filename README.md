@@ -18,7 +18,7 @@ npm run ingest
 
 ### WhatsApp Entegrasyonu
 
-WhatsApp Cloud API entegrasyonu sayesinde kullanıcılarla sohbet tabanlı etkileşim kurar. Şu anki yapıda belirlenen komutlara göre kısa video ve uzun video önerisi yapar; ayrıca karşılama mesajları ve özel yanıtlar da özelleştirilebilir.
+WhatsApp Cloud API entegrasyonu sayesinde kullanıcılarla sohbet tabanlı etkileşim kurar. Mesaj içeriğine göre otomatik komut tespiti yapar ve uygun yanıtları yönlendirir. Uzun mesajları otomatik olarak bölerek gönderir.
 
 ### 📖 Risale-i Nur Koleksiyonu
 

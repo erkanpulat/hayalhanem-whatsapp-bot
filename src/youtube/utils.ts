@@ -1,4 +1,4 @@
-import type { VideoRecord } from "./ingest.js";
+import type { VideoRecord } from '../types/youtube.js';
 import { toISO, isoDurationToSeconds } from '../utils/date-utils.js';
 
 const SHORT_THRESHOLD_SEC = 90;

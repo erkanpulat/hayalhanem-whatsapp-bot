@@ -5,9 +5,17 @@
  */
 
 import { consumeSpecialMessageFIFO, videoService } from '../services/video.service.js';
-import { sanitizeWhatsApp, createVideoBlock } from './utils.js';
+import { sanitizeWhatsApp } from '../utils/text-utils.js';
+import { createVideoBlock } from './utils.js';
 
 const SPECIAL_MESSAGES_ENABLED = process.env.SPECIAL_MESSAGES_ENABLED === 'true';
+
+const TIME_GREETINGS = {
+	MORNING: { start: 5, end: 12, message: 'Hayırlı sabahlar dilerim. 🌅' },
+	DAY: { start: 12, end: 18, message: 'Hayırlı günler dilerim. ☀️' },
+	EVENING: { start: 18, end: 23, message: 'Hayırlı akşamlar dilerim. 🌇' },
+	NIGHT: { message: 'Hayırlı geceler dilerim. 🌙' }
+} as const;
 
 /**
  * Standard greeting with time-based message
@@ -161,15 +169,20 @@ export function unknownCommandText(): string {
 	].join('\n');
 }
 
-// Helper functions
 function greetingByHour(d: Date): string {
 	const h = getHourTR(d);
 
-	if (h >= 5 && h < 12) return 'Hayırlı sabahlar dilerim. 🌅';
-	if (h >= 12 && h < 18) return 'Hayırlı günler dilerim. ☀️';
-	if (h >= 18 && h < 23) return 'Hayırlı akşamlar dilerim. 🌇';
+	if (h >= TIME_GREETINGS.MORNING.start && h < TIME_GREETINGS.MORNING.end) {
+		return TIME_GREETINGS.MORNING.message;
+	}
+	if (h >= TIME_GREETINGS.DAY.start && h < TIME_GREETINGS.DAY.end) {
+		return TIME_GREETINGS.DAY.message;
+	}
+	if (h >= TIME_GREETINGS.EVENING.start && h < TIME_GREETINGS.EVENING.end) {
+		return TIME_GREETINGS.EVENING.message;
+	}
 
-	return 'Hayırlı geceler dilerim. 🌙';
+	return TIME_GREETINGS.NIGHT.message;
 }
 
 function getHourTR(d: Date): number {

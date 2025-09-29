@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import type { WhatsAppTextMessage } from '../types/whatsapp.js';
 import { splitTextIntelligently } from './utils.js';
 
 const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
@@ -59,7 +60,7 @@ async function sendSingleMessage(msg: WhatsAppTextMessage): Promise<void> {
 		type: 'text',
 		text: {
 			body: msg.body,
-			preview_url: true
+			preview_url: msg.preview_url ?? false
 		}
 	};
 
@@ -86,10 +87,4 @@ async function sendSingleMessage(msg: WhatsAppTextMessage): Promise<void> {
 
 		throw error;
 	}
-}
-
-export interface WhatsAppTextMessage {
-	to: string;
-	body: string;
-	phoneNumberId: string;
 }

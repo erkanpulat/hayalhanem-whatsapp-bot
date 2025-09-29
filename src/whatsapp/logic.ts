@@ -1,6 +1,7 @@
+import type { IncomingMessage } from '../types/whatsapp.js';
 import { detectIntent } from './intent.js';
-import { 
-	buildWelcomeMessage, 
+import {
+	buildWelcomeMessage,
 	buildCommandResponse,
 	unknownCommandText,
 	createInfoContent
@@ -13,7 +14,7 @@ const REINTRO_MS = 12 * 60 * 60 * 1000;
 // ephemeral per-process memory (can switch to persistent later)
 const lastSeen = new Map<string, number>();
 
-export async function handleIncoming(msg: IncomingMessage): Promise<string> {
+export async function handleIncoming(msg: IncomingMessage): Promise<{ response: string, previewUrl: boolean }> {
 	const { from, text, timestamp, name } = msg;
 	const cleanText = (text ?? '').trim();
 
@@ -32,42 +33,53 @@ export async function handleIncoming(msg: IncomingMessage): Promise<string> {
 	}
 	const isNewOrReturning = !prevSeen || (timestamp - prevSeen) >= REINTRO_MS;
 
+	// Risale content should not show URL preview, others should
+	const previewUrl = intent !== 'risale';
+
 	// Handle all intents with proper greeting for new/returning users
 	switch (intent) {
 		case 'risale':
 			const risaleContent = await handleRisale(cleanText);
-			return isNewOrReturning 
-				? await buildWelcomeMessage(name, from, risaleContent)
-				: await buildCommandResponse(from, risaleContent);
+			return {
+				response: isNewOrReturning
+					? await buildWelcomeMessage(name, from, risaleContent)
+					: await buildCommandResponse(from, risaleContent),
+				previewUrl
+			};
 
 		case 'info':
 			const infoContent = createInfoContent();
-			return isNewOrReturning
-				? await buildWelcomeMessage(name, from, infoContent)
-				: await buildCommandResponse(from, infoContent, true);
+			return {
+				response: isNewOrReturning
+					? await buildWelcomeMessage(name, from, infoContent)
+					: await buildCommandResponse(from, infoContent, true),
+				previewUrl
+			};
 
 		case 'short':
 			const shortContent = await handleVideoRequest('short');
-			return isNewOrReturning
-				? await buildWelcomeMessage(name, from, shortContent)
-				: await buildCommandResponse(from, shortContent);
+			return {
+				response: isNewOrReturning
+					? await buildWelcomeMessage(name, from, shortContent)
+					: await buildCommandResponse(from, shortContent),
+				previewUrl
+			};
 
 		case 'long':
 			const longContent = await handleVideoRequest('long');
-			return isNewOrReturning
-				? await buildWelcomeMessage(name, from, longContent)
-				: await buildCommandResponse(from, longContent);
+			return {
+				response: isNewOrReturning
+					? await buildWelcomeMessage(name, from, longContent)
+					: await buildCommandResponse(from, longContent),
+				previewUrl
+			};
 
 		default:
-			return isNewOrReturning
-				? await buildWelcomeMessage(name, from)
-				: unknownCommandText();
+			return {
+				response: isNewOrReturning
+					? await buildWelcomeMessage(name, from)
+					: unknownCommandText(),
+				previewUrl
+			};
 	}
-}
-
-export interface IncomingMessage {
-	from: string;
-	text?: string | null;
-	timestamp: number;
-	name?: string;
 }

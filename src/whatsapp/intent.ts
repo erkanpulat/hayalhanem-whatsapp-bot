@@ -15,6 +15,7 @@
  * to handle various ways users might express their requests in casual conversation.
  */
 
+import type { DetectedIntent } from '../types/whatsapp.js';
 import { normalizeText, textMatches } from '../utils/text-utils.js';
 
 const INTENT_WORDS: Record<Exclude<DetectedIntent, 'unknown'>, string[]> = {
@@ -38,5 +39,3 @@ export function detectIntent(input: string | null | undefined): DetectedIntent {
 
 	return 'unknown';
 }
-
-export type DetectedIntent = 'short' | 'long' | 'info' | 'risale' | 'unknown';

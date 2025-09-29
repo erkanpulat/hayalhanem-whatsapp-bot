@@ -2,11 +2,11 @@ import 'dotenv/config';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { VideoRecordWithFetch, CursorMap, VideoRecord } from '../types/youtube.js';
 import {
 	getUploadsPlaylistId,
 	listAllPlaylistItems,
 	hydrateVideoDetails,
-	type VideoRecord,
 } from './ingest.js';
 import { classify, toISO } from './utils.js';
 import { atomicWrite, ensureDir, readJsonSafe } from '../utils/file-ops.js';
@@ -254,7 +254,3 @@ main().catch((err) => {
 	console.error('❌ Fatal:', data);
 	process.exit(1);
 });
-
-type VideoRecordWithFetch = VideoRecord & { fetchedAt?: string };
-type CursorEntry = { lastPublishedAt?: string; lastRunAt?: string };
-type CursorMap = Record<string, CursorEntry>;

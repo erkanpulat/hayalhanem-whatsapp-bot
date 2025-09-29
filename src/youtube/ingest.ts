@@ -1,3 +1,4 @@
+import type { PlaylistItemRef, VideoRecord } from '../types/youtube.js';
 import { yt } from './client.js';
 import { isoDurationToSeconds, getVideoUrl } from './utils.js';
 
@@ -173,20 +174,4 @@ export async function hydrateVideoDetails(videoIds: string[]): Promise<VideoReco
 		console.error(`❌ Video hydration failed:`, error);
 		throw error;
 	}
-}
-
-interface PlaylistItemRef {
-	videoId: string;
-	publishedAt: string;
-}
-
-export interface VideoRecord {
-	id: string;
-	title: string;
-	description: string;
-	url: string;
-	channelId?: string;
-	channelTitle?: string;
-	publishedAt: string;
-	durationSec: number;
 }
