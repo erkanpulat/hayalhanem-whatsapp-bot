@@ -3,12 +3,18 @@ import type { Variant } from '../../types/video.js';
 import { createVideoBlock } from '../utils.js';
 
 export async function handleVideoRequest(variant: Variant): Promise<string> {
-	const video = await videoService.getRecommendation(variant);
+	try {
+		const video = await videoService.getRecommendation(variant);
 
-	if (!video) {
+		if (!video) {
+			const videoType = variant === 'short' ? 'kısa' : 'uzun';
+			return `Şu an ${videoType} video bulamadım. Lütfen daha sonra tekrar deneyin.`;
+		}
+
+		return createVideoBlock(video);
+	} catch (error) {
+		console.error(`❌ Error handling video request for ${variant}:`, error);
 		const videoType = variant === 'short' ? 'kısa' : 'uzun';
-		return `Şu an ${videoType} video bulamadım. Lütfen daha sonra tekrar deneyin.`;
+		return `❌ ${videoType} video yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.`;
 	}
-
-	return createVideoBlock(video);
 }

@@ -47,32 +47,37 @@ Kullanıcı mesajlarına yanıt verir, komutları algılar ve uygun içeriği d�
 > WhatsApp’ın tek mesaj için koyduğu **4096 karakter sınırı** nedeniyle, bot uzun içerikleri **otomatik olarak parçalayarak birden fazla mesaj hâlinde** gönderir.  
 > Böylece Risale-i Nur’daki uzun sayfalar ya da çok satırlı açıklamalar kullanıcıya eksiksiz ulaşır.
 
-#### 📖 Risale-i Nur Koleksiyonu
+#### 📖 Risale-i Nur Külliyatı
 
-Bot şu an **Risale-i Nur Sözler koleksiyonunu** içermektedir ve WhatsApp üzerinden kolayca okunabilir.
+Bot şu an **Risale-i Nur Sözler Kitabı'nı** içermektedir ve WhatsApp üzerinden kolayca okunabilir.
 
 > 💡 **Anlam Açık Modu:**  
 > Bu mod aktifken **kelimelerin yanına kalın yazı ile anlamı eklenir** ve okumayı / öğrenmeyi kolaylaştırır.  
 > İstenirse anlamlar kapatılarak yalnızca orijinal metin görüntülenebilir.
 
+> 📚 **Kelime Çalışması:**  
+> Sözler Kitabı'ndaki **zor kelimelerin anlamları** ayrı olarak çıkarılmış ve **rastgele kelime öğrenme** özelliği eklenmiştir.  
+> **Anlam kapalı** modunda o sayfada geçen kelimeler sayfa altında gösterilir.
+
 #### 💬 Komutlar
 
 Aşağıdaki tablo, botun desteklediği tüm komutları ve işlevlerini özetler:
+
 
 | Komut / İfade                                                             | Açıklama                                                                                 |
 |---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | `/bilgi`                                                                  | Botun özelliklerini ve komut listesini gösterir.                                        |
 | `/kisavideo`                                                              | Kısa (≤ 90 sn) bir video önerir.                                                        |
-| **kısa video ile ilgili herhangi bir ifade**<br>örn: “kısa video öner”, “bana kısa video gönder” | Slash komut yazmadan da **kısa video** isteği gönderir.                                 |
+| **kısa video ile ilgili herhangi bir ifade**<br>örn: "kısa video öner", "bana kısa video gönder" | Slash komut yazmadan da **kısa video** isteği gönderir.                                 |
 | `/uzunvideo`                                                              | Uzun (> 90 sn) bir video önerir.                                                        |
-| **uzun video ile ilgili herhangi bir ifade**<br>örn: “uzun video öner”, “uzun bir video istiyorum” | Slash komut yazmadan da **uzun video** isteği gönderir.                                 |
-| `/risale`                                                                 | Risale-i Nur koleksiyonu için yardım menüsünü gösterir.                                 |
-| `risale söz 18`                                                            | 18. Söz’ün ilk sayfasını açar (**varsayılan:** anlamlar açık).                          |
-| `risale söz 18 sayfa 3`                                                    | 18. Söz’ün 3. sayfasını açar (**varsayılan:** anlamlar açık).                            |
-| `risale söz 18 kapali`                                                     | 18. Söz’ün ilk sayfasını açar, **anlamları gizler**.                                     |
-| `risale söz 18 sayfa 3 kapali`                                             | 18. Söz’ün 3. sayfasını açar, **anlamları gizler**.                                      |
-| `risale sayfa 421`                                                         | Sözlerin **421. sayfasını** açar (**varsayılan:** anlamlar açık).                      |
-| `risale sayfa 421 kapali`                                                  | Sözlerin **421. sayfasını** açar, **anlamları gizler**.                                 |
+| **uzun video ile ilgili herhangi bir ifade**<br>örn: "uzun video öner", "uzun bir video istiyorum" | Slash komut yazmadan da **uzun video** isteği gönderir.                                 |
+| `/risale`                                                                 | Risale-i Nur Sözler Kitabı için yardım menüsünü gösterir.                               |
+| `/risaleicindekiler`                                                      | Tüm Sözler'in listesini ve sayfa bilgilerini gösterir.                                   |
+| `/risalekelimeler`                                                        | Sözler Kitabı'ndan rastgele 15 kelime ve anlamını getirir.                               |
+| `/risalesozler 9`                                                         | 9. Söz'ün ilk sayfasını açar (**varsayılan:** anlamlar açık).                          |
+| `/risalesozler 9 sayfa 2 kapalı`                                          | 9. Söz'ün 2. sayfasını açar, **anlamları gizler**.                          |
+| `/risalesozlersayfa 421`                                                  | **Sözler Kitabı'nın 421. sayfasını** açar (**varsayılan:** anlamlar açık).              |
+| **risale ile ilgili herhangi bir ifade**<br>örn: "risale sözler 9", "risale sözler 9 kapalı", "risale sözler sayfa 421" | Slash komut yazmadan da **Risale okuma** isteği gönderir. Anlam açık/kapalı ve sayfa belirtme desteklenir.</parameter>
 
 ## 🧭 Yol Haritası
 

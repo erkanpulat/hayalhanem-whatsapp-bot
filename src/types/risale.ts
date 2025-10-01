@@ -1,5 +1,5 @@
 export interface RisalePage {
-	globalId: number;
+	sozlerId: number;
 	pageIndex: number;
 	sozNo: number;
 	url: string;
@@ -8,6 +8,10 @@ export interface RisalePage {
 	footnotes: Array<{
 		n: string;
 		text: string;
+	}>;
+	dictionary?: Array<{
+		word: string;
+		meaning: string;
 	}>;
 }
 
@@ -24,10 +28,10 @@ export interface RisaleSoz {
 }
 
 export interface RisaleCommand {
-	type: 'help' | 'soz' | 'globalPage';
+	type: 'help' | 'soz' | 'sozlerPage' | 'toc' | 'kelime';
 	sozNo?: number;
 	pageNo?: number;
-	globalPageId?: number;
+	sozlerPageId?: number;
 	showMeaning?: 'open' | 'closed';
 }
 

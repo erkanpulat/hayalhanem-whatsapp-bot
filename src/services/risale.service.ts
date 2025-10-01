@@ -28,8 +28,20 @@ export class RisaleService {
 			return { type: 'help' };
 		}
 
-		// risale söz 18 sayfa 3 → specific soz and page
-		const sozPageMatch = normalized.match(/risale\s+(?:soz|sozler|sozleri)\s+(\d+)\s+sayfa\s+(\d+)(?:\s+(kapali))?/);
+		// risale içindekiler → table of contents
+		const tocMatch = normalized.match(/^risale\s+(?:icindekiler|liste)$|^risaleicindekiler$/);
+		if (tocMatch) {
+			return { type: 'toc' };
+		}
+
+		// risale kelime → random words
+		const kelimeMatch = normalized.match(/^risale\s+(?:kelime|kelimeler)$|^risalekelimeler?$/);
+		if (kelimeMatch) {
+			return { type: 'kelime' };
+		}
+
+		// risale sözler 18 sayfa 3 OR risalesozler 18 sayfa 3 → specific soz and page
+		const sozPageMatch = normalized.match(/(?:risale\s+(?:soz|sozler|sozleri)|risalesozler)\s+(\d+)\s+sayfa\s+(\d+)(?:\s+(kapali))?/);
 		if (sozPageMatch && sozPageMatch[1] && sozPageMatch[2]) {
 			return {
 				type: 'soz',
@@ -39,8 +51,8 @@ export class RisaleService {
 			};
 		}
 
-		// risale söz 18 kapali → first page of soz with closed meaning
-		const sozClosedMatch = normalized.match(/risale\s+(?:soz|sozler|sozleri)\s+(\d+)\s+(kapali)/);
+		// risale sözler 18 kapali OR risalesozler 18 kapali → first page of soz with closed meaning
+		const sozClosedMatch = normalized.match(/(?:risale\s+(?:soz|sozler|sozleri)|risalesozler)\s+(\d+)\s+(kapali)/);
 		if (sozClosedMatch && sozClosedMatch[1]) {
 			return {
 				type: 'soz',
@@ -50,8 +62,8 @@ export class RisaleService {
 			};
 		}
 
-		// risale söz 18 → first page of soz with open meaning
-		const sozMatch = normalized.match(/risale\s+(?:soz|sozler|sozleri)\s+(\d+)/);
+		// risale sözler 18 OR risalesozler 18 → first page of soz with open meaning
+		const sozMatch = normalized.match(/(?:risale\s+(?:soz|sozler|sozleri)|risalesozler)\s+(\d+)/);
 		if (sozMatch && sozMatch[1]) {
 			return {
 				type: 'soz',
@@ -61,13 +73,13 @@ export class RisaleService {
 			};
 		}
 
-		// risale sayfa 385 kapali → global page with closed meaning
-		const globalPageMatch = normalized.match(/risale\s+sayfa\s+(\d+)(?:\s+(kapali))?/);
-		if (globalPageMatch && globalPageMatch[1]) {
+		// risale sözler sayfa 385 kapali OR risalesozlersayfa 385 kapali → sözler page with closed meaning
+		const sozlerPageMatch = normalized.match(/(?:risale\s+(?:soz|sozler|sozleri)\s+sayfa|risalesozlersayfa)\s+(\d+)(?:\s+(kapali))?/);
+		if (sozlerPageMatch && sozlerPageMatch[1]) {
 			return {
-				type: 'globalPage',
-				globalPageId: parseInt(globalPageMatch[1], 10),
-				showMeaning: globalPageMatch[2] === 'kapali' ? 'closed' : 'open'
+				type: 'sozlerPage',
+				sozlerPageId: parseInt(sozlerPageMatch[1], 10),
+				showMeaning: sozlerPageMatch[2] === 'kapali' ? 'closed' : 'open'
 			};
 		}
 
@@ -100,18 +112,25 @@ export class RisaleService {
 	}
 
 	/**
-	 * Get page by global ID
+	 * Get page by Sözler Kitabı ID
 	 */
-	async getGlobalPage(globalPageId: number, showMeaning: 'open' | 'closed' = 'open'): Promise<RisalePage | null> {
+	async getSozlerPage(sozlerPageId: number, showMeaning: 'open' | 'closed' = 'open'): Promise<RisalePage | null> {
 		try {
 			const pageMap = await this.loadPageMap();
-			const entry = pageMap[globalPageId.toString()];
+			const entry = pageMap[sozlerPageId.toString()];
 
 			if (!entry) return null;
 
-			return this.getPage(entry.sozNo, entry.pageIndex, showMeaning);
+			const page = await this.getPage(entry.sozNo, entry.pageIndex, showMeaning);
+			if (!page) return null;
+
+			// Set the sozlerId for global page system
+			return {
+				...page,
+				sozlerId: sozlerPageId
+			};
 		} catch (error) {
-			console.error(`❌ Error getting global page ${globalPageId}:`, error);
+			console.error(`❌ Error getting Sözler Kitabı page ${sozlerPageId}:`, error);
 			return null;
 		}
 	}
@@ -150,6 +169,101 @@ export class RisaleService {
 	}
 
 	/**
+	 * Get formatted table of contents summary
+	 */
+	async getTocSummary(): Promise<string> {
+		try {
+			const toc = await this.getToc();
+			if (!toc.length) return '❌ İçindekiler bulunamadı.';
+
+			const lines = [
+				'📖 *RİSALE-İ NUR - SÖZLER | İÇİNDEKİLER*',
+				''
+			];
+
+			for (const entry of toc) {
+				const emoji = this.getSozEmoji(entry.sozNo);
+				const title = entry.title.replace(/^\d+\.\s*/, '');
+				const pageInfo = `(${entry.range.count} sayfa)`;
+				const sozlerInfo = `Sözler Kitabı: ${entry.range.startId}-${entry.range.endId}`;
+
+				lines.push(`${emoji} *${entry.sozNo}. ${title}* ${pageInfo} - ${sozlerInfo}`);
+			}
+
+			lines.push('');
+			lines.push(`📍 *Toplam:* ${toc.length} Söz`);
+			lines.push('');
+			lines.push('💡Komutlar için: `/risale`');
+
+			return lines.join('\n');
+		} catch (error) {
+			console.error('❌ Error getting TOC summary:', error);
+			return '❌ İçindekiler yüklenirken hata oluştu.';
+		}
+	}
+
+	/**
+	 * Get emoji for soz number
+	 */
+	private getSozEmoji(sozNo: number): string {
+		if (sozNo <= 9) return `${sozNo}️⃣`;
+		if (sozNo === 10) return '🔟';
+
+		const digits = sozNo.toString().split('');
+		return digits.map(digit => `${digit}️⃣`).join('');
+	}
+
+	/**
+	 * Get number emoji for lists
+	 */
+	private getNumberEmoji(num: number): string {
+		if (num <= 9) return `${num}️⃣`;
+		if (num === 10) return '🔟';
+
+		const digits = num.toString().split('');
+		return digits.map(digit => `${digit}️⃣`).join('');
+	}
+
+	/**
+	 * Get random words from Sözler Kitabı dictionary
+	 */
+	async getRandomWords(count: number = 15): Promise<string> {
+		try {
+			const dictionaryPath = resolve(INDEX_DIR, 'dictionary.json');
+			const dictionary = await readJsonSafe(dictionaryPath, {});
+
+			if (!dictionary || Object.keys(dictionary).length === 0) {
+				return '❌ Kelime sözlüğü bulunamadı.';
+			}
+
+			const entries = Object.entries(dictionary);
+			const shuffled = entries.sort(() => 0.5 - Math.random());
+			const selected = shuffled.slice(0, count);
+
+			const lines = [
+				'📚 *RİSALE-İ NUR - SÖZLER | RASTGELE KELİMELER*',
+				'',
+				'🔤 *Bu kelimeler Risale-i Nur Sözler Kitabı\'ndan:*',
+				''
+			];
+
+			selected.forEach((entry, index) => {
+				const [word, meaning] = entry;
+				const emoji = this.getNumberEmoji(index + 1);
+				lines.push(`${emoji} *${word}:* ${meaning}`);
+			});
+
+			lines.push('');
+			lines.push('💡 Yeni kelimeler öğrenmeye devam etmek için komutu kullanabilir veya `risale kelimeler` yazabilirsiniz.');
+
+			return lines.join('\n');
+		} catch (error) {
+			console.error('❌ Error getting random words:', error);
+			return '❌ Kelimeler yüklenirken hata oluştu.';
+		}
+	}
+
+	/**
 	 * Get total number of pages available
 	 */
 	async getTotalPageCount(): Promise<number> {
@@ -166,20 +280,27 @@ export class RisaleService {
 	/**
 	 * Get next page navigation info for a given page
 	 */
-	async getNextPageInfo(currentPage: RisalePage): Promise<{ command: string; description: string; globalCommand?: string } | null> {
+	async getNextPageInfo(currentPage: RisalePage): Promise<{ command: string; description: string; sozlerCommand?: string } | null> {
 		try {
 			const sozInfo = await this.getSozInfo(currentPage.sozNo);
 			if (!sozInfo) return null;
 
+			// Calculate current sozlerId if not available
+			let currentSozlerId = currentPage.sozlerId;
+			if (!currentSozlerId) {
+				// Calculate from sozNo and pageIndex using the range
+				currentSozlerId = sozInfo.range.startId + (currentPage.pageIndex - 1);
+			}
+
 			// Check if there's a next page in the same soz
 			if (currentPage.pageIndex < sozInfo.range.count) {
 				const nextPageNo = currentPage.pageIndex + 1;
-				const nextGlobalId = currentPage.globalId + 1;
+				const nextSozlerId = currentSozlerId + 1;
 
 				return {
-					command: `risale söz ${currentPage.sozNo} sayfa ${nextPageNo}`,
-					description: `${currentPage.sozNo}. Söz ${nextPageNo}. sayfa`,
-					globalCommand: `risale sayfa ${nextGlobalId}`
+					command: `/risalesozler ${currentPage.sozNo} sayfa ${nextPageNo}`,
+					description: `${currentPage.sozNo}. Söz ${nextPageNo}. sayfasını açar`,
+					sozlerCommand: `/risalesozlersayfa ${nextSozlerId}`
 				};
 			}
 
@@ -189,12 +310,12 @@ export class RisaleService {
 			if (currentSozIndex >= 0 && currentSozIndex < toc.length - 1) {
 				const nextSoz = toc[currentSozIndex + 1];
 				if (nextSoz) {
-					const nextGlobalId = currentPage.globalId + 1;
+					const nextSozlerId = currentSozlerId + 1;
 
 					return {
-						command: `risale söz ${nextSoz.sozNo}`,
-						description: `${nextSoz.sozNo}. Söz 1. sayfa`,
-						globalCommand: `risale sayfa ${nextGlobalId}`
+						command: `/risalesozler ${nextSoz.sozNo}`,
+						description: `${nextSoz.sozNo}. Söz 1. sayfasını açar`,
+						sozlerCommand: `/risalesozlersayfa ${nextSozlerId}`
 					};
 				}
 			}

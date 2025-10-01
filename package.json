@@ -1,7 +1,7 @@
 {
 	"name": "hayalhanem-whatsapp-bot",
 	"version": "1.0.0",
-	"description": "WhatsApp üzerinden Hayalhanem YouTube videolarını öneren ve Risale-i Nur koleksiyonunu sunan hobi projesi.",
+	"description": "WhatsApp üzerinden Hayalhanem YouTube videolarını öneren ve Risale-i Nur külliyatını sunan hobi projesi.",
 	"main": "src/server.ts",
 	"type": "module",
 	"scripts": {

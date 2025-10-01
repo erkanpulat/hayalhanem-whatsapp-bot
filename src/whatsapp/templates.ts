@@ -42,10 +42,15 @@ export async function createSpecialMessageSection(from: string): Promise<string>
 		return '';
 	}
 
-	const special = await consumeSpecialMessageFIFO(from);
-	if (!special) return '';
+	try {
+		const special = await consumeSpecialMessageFIFO(from);
+		if (!special) return '';
 
-	return `*_Robottan Sana Özel Mesaj:_* ${special}`;
+		return `*_Robottan Sana Özel Mesaj:_* ${special}`;
+	} catch (error) {
+		console.error('❌ Error loading special message:', error);
+		return ''; // Gracefully return empty instead of failing
+	}
 }
 
 /**
@@ -64,15 +69,19 @@ export function createCommandsSection(): string {
 		'🎬 Hayalhanem kanallarından kısa video önermemi istiyorsan:',
 		'   • `/kisavideo` komutu veya',
 		'   • *_"Kısa video öner"_* benzeri bir cümle yazabilirsin.',
-		'📺 Hayalhanem kanallarından uzun video önermemi istersen:', 
+		'📺 Hayalhanem kanallarından uzun video önermemi istersen:',
 		'   • `/uzunvideo` komutu veya',
 		'   • *_"Uzun video öner"_* benzeri bir cümle yazabilirsin.',
-		'📖 Risale-i Nur okumak için:',
-		'   • `/risale` komutu veya',
-		'   • *_"risale söz 18"_* veya *_"risale sayfa 421"_* yazabilirsin.',
-		'ℹ️ Beni tanımak ve hakkımda bilgi almak için:',
-		'   • `/bilgi` komutu veya', 
-		'   • *_"bilgi istiyorum"_* benzeri bir cümle yazabilirsin.',
+		'📖 Risale-i Nur Sözler Kitabı okumak için:',
+		'   • `/risalesozler 9` → 9. Söz\'ün *1. sayfasını* açar',
+		'   • `/risalesozlersayfa 421` → *Sözler Kitabı\'ndan 421. sayfayı* açar',
+		'   • *_"risale sözler 9"_* → Doğal komutlar da çalışır',
+		'📚 Risale-i Nur içindekiler ve kelime öğrenmek için:',
+		'   • `/risaleicindekiler` → Tüm Sözler listesini gösterir',
+		'   • `/risalekelimeler` → Rastgele 15 kelime ve anlamını getirir',
+		'ℹ️ Yardım ve bilgi almak için:',
+		'   • `/risale` → Risale komutları rehberi',
+		'   • `/bilgi` → Bot hakkında bilgi',
 		'',
 		'💡 *İpucu:* Bana doğal bir şekilde konuşabilirsin! "Kısa bir video önerir misin?" gibi cümleleri de anlıyorum.'
 	].join('\n');
@@ -210,6 +219,6 @@ export function createInfoContent(): string {
 		'🎬 *Yapabileceklerim:*',
 		'• Hayalhanem YouTube kanallarından 90 saniyeye kadar kısa bir video önerebilirim.',
 		'• Hayalhanem YouTube kanallarından 90 saniyeden uzun bir video önerebilirim.',
-		'• Risale-i Nur Sözler koleksiyonundan içerik paylaşabilirim.'
+		'• Risale-i Nur Sözler Kitabı\'ndan içerik paylaşabilirim.'
 	].join('\n');
 }

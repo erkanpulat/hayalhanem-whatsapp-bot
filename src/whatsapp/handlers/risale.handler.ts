@@ -11,11 +11,17 @@ export async function handleRisale(text: string): Promise<string> {
 			case 'help':
 				return createHelpMessage();
 
+			case 'toc':
+				return await risaleService.getTocSummary();
+
+			case 'kelime':
+				return await risaleService.getRandomWords(15);
+
 			case 'soz':
 				return await handleSozRequest(command);
 
-			case 'globalPage':
-				return await handleGlobalPageRequest(command);
+			case 'sozlerPage':
+				return await handleSozlerPageRequest(command);
 
 			default:
 				return createHelpMessage();
@@ -51,21 +57,21 @@ async function handleSozRequest(command: RisaleCommand): Promise<string> {
 	return await createPageMessage(page, command);
 }
 
-async function handleGlobalPageRequest(command: RisaleCommand): Promise<string> {
-	if (!command.globalPageId) return createErrorMessage();
+async function handleSozlerPageRequest(command: RisaleCommand): Promise<string> {
+	if (!command.sozlerPageId) return createErrorMessage();
 
 	const totalPages = await risaleService.getTotalPageCount();
-	if (command.globalPageId > totalPages || command.globalPageId < 1) {
-		return `❌ Global sayfa ${command.globalPageId} bulunamadı. Lütfen 1-${totalPages} arası bir sayı girin.`;
+	if (command.sozlerPageId > totalPages || command.sozlerPageId < 1) {
+		return `❌ Sözler Kitabı sayfa ${command.sozlerPageId} bulunamadı. Lütfen 1-${totalPages} arası bir sayı girin.`;
 	}
 
-	const page = await risaleService.getGlobalPage(
-		command.globalPageId,
+	const page = await risaleService.getSozlerPage(
+		command.sozlerPageId,
 		command.showMeaning || 'open'
 	);
 
 	if (!page) {
-		return `❌ Global sayfa ${command.globalPageId} bulunamadı.`;
+		return `❌ Sözler Kitabı sayfa ${command.sozlerPageId} bulunamadı.`;
 	}
 
 	return await createPageMessage(page, command);
@@ -74,11 +80,11 @@ async function handleGlobalPageRequest(command: RisaleCommand): Promise<string> 
 async function createPageMessage(page: RisalePage, command: RisaleCommand): Promise<string> {
 	const parts = [];
 
-	// Header - show different format for global page vs soz page
+	// Header - show different format for Sözler Kitabı page vs soz page
 	const meaningType = command.showMeaning === 'closed' ? ' (Anlam Kapalı)' : '';
 
-	if (command.type === 'globalPage') {
-		parts.push(`🌐 *Global ${page.globalId}. Sayfa - ${page.sozNo}. Söz ${page.pageIndex}. Sayfa${meaningType}*`);
+	if (command.type === 'sozlerPage') {
+		parts.push(`🌐 *Sözler Kitabı ${page.sozlerId}. Sayfa - ${page.sozNo}. Söz ${page.pageIndex}. Sayfa${meaningType}*`);
 	} else {
 		parts.push(`📖 *${page.sozNo}. Söz - ${page.pageIndex}. Sayfa${meaningType}*`);
 	}
@@ -92,11 +98,20 @@ async function createPageMessage(page: RisalePage, command: RisaleCommand): Prom
 		parts.push('_İçerik bulunamadı._');
 	}
 
-	if (page.footnotes?.length && parts.join('\n').length < 2500) {
+	if (page.footnotes?.length) {
 		parts.push('');
 		parts.push('📝 *Dipnotlar:*');
 		page.footnotes.forEach(footnote => {
 			parts.push(`[${footnote.n}] ${footnote.text}`);
+		});
+	}
+
+	// Anlam kapalı modda sayfa sözlüğünü EN ALTA ekle
+	if (command.showMeaning === 'closed' && page.dictionary?.length) {
+		parts.push('');
+		parts.push('📚 *Bu Sayfadaki Kelimeler:*');
+		page.dictionary.forEach(entry => {
+			parts.push(`• *${entry.word}:* ${entry.meaning}`);
 		});
 	}
 
@@ -105,8 +120,8 @@ async function createPageMessage(page: RisalePage, command: RisaleCommand): Prom
 		parts.push('');
 		parts.push(`➡️ *Sonraki sayfa:*`);
 		parts.push(`• \`${nextPageInfo.command}\` _(${nextPageInfo.description})_`);
-		if (nextPageInfo.globalCommand) {
-			parts.push(`• \`${nextPageInfo.globalCommand}\` _(Global sayfa)_`);
+		if (nextPageInfo.sozlerCommand) {
+			parts.push(`• \`${nextPageInfo.sozlerCommand}\` _(Sözler Kitabı sonraki sayfa)_`);
 		}
 	}
 
@@ -118,25 +133,29 @@ async function createPageMessage(page: RisalePage, command: RisaleCommand): Prom
 
 function createHelpMessage(): string {
 	return [
-		'📖 *Risale-i Nur - Sözler Rehberi*',
+		'📖 *RİSALE-İ NUR - SÖZLER | REHBER*',
 		'',
 		'🔍 *Örnek komutlar:*',
 		'',
 		'📚 *Bir Söz’ü sayfa sayfa okumak için:*',
-		'• `risale söz 18` → 18. Söz’ün *1. sayfasını* açar (*anlamlar açık - varsayılan*)',
-		'• `risale söz 18 sayfa 3` → 18. Söz’ün *3. sayfasını* açar (*anlamlar açık*)',
-		'• `risale söz 18 kapali` → 18. Söz’ün *1. sayfasını* açar, *anlamları gizler*',
-		'• `risale söz 18 sayfa 3 kapali` → 18. Söz’ün *3. sayfasını* açar, *anlamları gizler*',
+		'• `/risalesozler 9` → 9. Söz\'ün *1. sayfasını* açar (*anlamlar açık - varsayılan*)',
+		'• `/risalesozler 9 sayfa 3` → 9. Söz\'ün *3. sayfasını* açar (*anlamlar açık*)',
+		'• `/risalesozler 9 kapali` → 9. Söz\'ün *1. sayfasını* açar, *anlamları gizler*',
+		'• *_"risale sözler 9"_* → Doğal dil ile de aynı işlev sağlanır',
 		'',
-		'🌍 *Tüm Sözler için global sayfa sistemini kullanmak için:*',
-		'• `risale sayfa 421` → *Global 421. sayfayı* açar (*anlamlar açık - varsayılan*)',
-		'• `risale sayfa 421 kapali` → *Global 421. sayfayı* açar, *anlamları gizler*',
+		'🌍 *Sözler Kitabı\'nın genel sayfa sistemini kullanmak için:*',
+		'• `/risalesozlersayfa 421` → *Sözler Kitabı\'ndan 421. sayfayı* açar (*anlamlar açık - varsayılan*)',
+		'• `/risalesozlersayfa 421 kapali` → *Sözler Kitabı\'ndan 421. sayfayı* açar, *anlamları gizler*',
+		'• *_"risale sözler sayfa 421"_* → Doğal dil ile de aynı işlev sağlanır',
 		'',
 		'ℹ️ *Genel:*',
-		'• `/risale` → Bu yardım menüsünü gösterir',
+		'• `/risale` → Yardım menüsünü gösterir',
+		'• `/risalekelimeler` → Sözler Kitabı’ndan rastgele 15 kelime ve anlamını getirir',
+		'• `/risaleicindekiler` → Tüm Sözler listesini gösterir',
+		'• *_"risale içindekiler"_* veya *_"risale liste"_* → Doğal dil ile de aynı işlev sağlanır',
 		'',
 		'✨ *Toplam 33 Söz mevcut (1-33)*',
-		'💡 Her Söz’ün *kendi sayfa numaraları* vardır; ayrıca tüm Sözler için ortak bir *global sayfa sistemi* de bulunur.',
+		'💡 Her Söz\'ün *kendi sayfa numaraları* vardır; ayrıca *Sözler Kitabı\'nın genel sayfa sistemi* de bulunur.',
 		'',
 		'🤲 Hayırlı ve verimli okumalar dilerim!'
 	].join('\n');
