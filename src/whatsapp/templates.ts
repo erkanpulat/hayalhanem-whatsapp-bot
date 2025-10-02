@@ -3,7 +3,6 @@
  * 
  * This file contains shared message templates and building blocks
  */
-
 import { consumeSpecialMessageFIFO, videoService } from '../services/video.service.js';
 import { sanitizeWhatsApp } from '../utils/text-utils.js';
 import { createVideoBlock } from './utils.js';
@@ -66,32 +65,34 @@ export function createDefaultContentIntro(): string {
 export function createCommandsSection(): string {
 	return [
 		'🤖 *Beni Nasıl Kullanabilirsin?*',
-		'🎬 Hayalhanem kanallarından kısa video önermemi istiyorsan:',
-		'   • `/kisavideo` komutu veya',
-		'   • *_"Kısa video öner"_* benzeri bir cümle yazabilirsin.',
-		'📺 Hayalhanem kanallarından uzun video önermemi istersen:',
-		'   • `/uzunvideo` komutu veya',
-		'   • *_"Uzun video öner"_* benzeri bir cümle yazabilirsin.',
-		'📖 Risale-i Nur Sözler Kitabı okumak için:',
-		'   • `/risalesozler 9` → 9. Söz\'ün *1. sayfasını* açar',
-		'   • `/risalesozlersayfa 421` → *Sözler Kitabı\'ndan 421. sayfayı* açar',
-		'   • *_"risale sözler 9"_* → Doğal komutlar da çalışır',
-		'📚 Risale-i Nur içindekiler ve kelime öğrenmek için:',
-		'   • `/risaleicindekiler` → Tüm Sözler listesini gösterir',
-		'   • `/risalekelimeler` → Rastgele 15 kelime ve anlamını getirir',
-		'ℹ️ Yardım ve bilgi almak için:',
-		'   • `/risale` → Risale komutları rehberi',
-		'   • `/bilgi` → Bot hakkında bilgi',
 		'',
-		'💡 *İpucu:* Bana doğal bir şekilde konuşabilirsin! "Kısa bir video önerir misin?" gibi cümleleri de anlıyorum.'
+		'🎬 *Hayalhanem YouTube Videoları:*',
+		'• `/hayalhanemkisavideo` → 90 saniyeye kadar kısa bir video öneririm.',
+		'• `/hayalhanemuzunvideo` → 90 saniyeden uzun bir video öneririm.',
+		'💡 Doğal dil ile de istekte bulunabilirsin: *_"Kısa video önerir misin?"_*, *_"uzun video gönder"_* gibi.',
+		'',
+		'📖 *Risale-i Nur - Sözler Kitabı:*',
+		'• `/risale` → Risale komutları için yardım menüsünü gösterir.',
+		'• `/risaleicindekiler` → Sözler Kitabı’nın içindekiler listesini ve sayfa numaralarını gösterir.',
+		'• `/risalekelimeler` → Rastgele 15 kelime seçerek kelime çalışması yapmanı sağlar.',
+		'• `/risalesozler 9` → 9. Söz’ün *1. sayfasını* açar (varsayılan: anlamlar açık).',
+		'• `/risalesozler 9 sayfa 2 kapalı` → 9. Söz’ün *2. sayfasını* açar, *anlamları kapalı olarak açar ve bilinmeyen kelimeleri sayfa sonunda listeler.*',
+		'• `/risalesozlersayfa 421` → *Sözler Kitabı’nın 421. sayfasını* açar (varsayılan: anlamlar açık).',
+		'💡 Doğal dil ile de istekte bulunabilirsin: *_"risale sözler 9 kapalı"_*, *_"risale sözler sayfa 421"_* gibi.',
+		'',
+		'ℹ️ *Genel:*',
+		'• `/bilgi` → Bot hakkında bilgi ve komut listesini gösterir.',
+		'',
+		'✨ İpucu: Slash komutlarını yazmak zorunda değilsin; doğal dilde konuşman da yeterli!'
 	].join('\n');
 }
+
 
 /**
  * Sharing footer message
  */
 export function createSharingFooter(): string {
-	return '📢 Beni beğendiysen profilime tıklayarak beni arkadaşlarınla paylaşabilirsin. 🤝';
+	return '📢 Hoşuna gittiysem, profilime dokunup arkadaşlarınla da tanıştırabilirsin! 🤗';
 }
 
 /**
@@ -209,16 +210,18 @@ function getHourTR(d: Date): number {
  */
 export function createInfoContent(): string {
 	return [
-		'🤖 *Ben Hayalhanem videolarını öneren ve Risale-i Nur içeriklerini paylaşan henüz test sürecinde olan bir robotum!*',
+		'🤖 *Ben, Hayalhanem YouTube kanallarından videolar öneren ve Risale-i Nur Sözler Kitabı’ndan okumalar sunan bir sohbet robotuyum!*',
 		'',
-		'✨ Bu benim ilk ve henüz basit versiyonum. Geliştiricim tarafından geliştirilmeye devam ediyorum.',
+		'✨ Bu benim henüz ilk sürümüm ve hâlâ geliştirilmeye devam ediyorum.',
 		'🛠️ Tamamen gönüllülük esasıyla *Erkan Pulat* tarafından açık kaynaklı bir proje olarak geliştiriliyorum.',
-		'📬 Gelişimime katkı sağlamak ya da hata/öneri bildirmek istersen:',
-		'👉 dryapptr@gmail.com adresinden ulaşabilirsin.',
+		'📬 Hata ya da önerilerini iletmek veya projeye katkı sağlamak istersen:',
+		'👉 dryapptr@gmail.com adresinden bize ulaşabilirsin.',
 		'',
-		'🎬 *Yapabileceklerim:*',
-		'• Hayalhanem YouTube kanallarından 90 saniyeye kadar kısa bir video önerebilirim.',
-		'• Hayalhanem YouTube kanallarından 90 saniyeden uzun bir video önerebilirim.',
-		'• Risale-i Nur Sözler Kitabı\'ndan içerik paylaşabilirim.'
+		'🎬 *Neler yapabilirim:*',
+		'• *Hayalhanem YouTube kanallarından* 90 saniyeye kadar *kısa video* önerebilirim.',
+		'• *Hayalhanem YouTube kanallarından* 90 saniyeden *uzun video* önerebilirim.',
+		'• *Risale-i Nur Sözler Kitabı’ndan* sayfa sayfa okuma yapmanı *kolayca sağlayabilirim.*',
+		'• Risale’de *anlam açık* veya *anlam kapalı* okuma yapabilir; *anlam kapalı* modunda bilinmeyen kelimeleri sayfa sonunda gösterebilirim.',
+		'• Risale-i Nur *Sözler Kitabı’ndan* rastgele 15 kelime seçerek kelime çalışması yapmanı sağlayabilirim.',
 	].join('\n');
 }

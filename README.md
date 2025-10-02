@@ -1,8 +1,8 @@
 # WhatsApp Hayalhanem Botu ![Status: Beta](https://img.shields.io/badge/status-beta-yellow)
 
-🚧 **Beta Sürüm** – Yol haritasındaki özellikler geliştirilmeye devam ediyor.
+🚧 **Beta Sürüm** – Bu proje hâlen geliştirme aşamasındadır; özellikler düzenli olarak eklenmeye devam etmektedir.
 
-📱 Test etmek için WhatsApp üzerinden şu numaraya mesaj atabilirsiniz:  
+📱 Botu test etmek için WhatsApp’tan şu numaraya mesaj gönderebilirsiniz:  
 👉 [https://wa.me/447435708498](https://wa.me/447435708498)  
 📜 [Komutlar listesine git](#-komutlar)
 
@@ -41,7 +41,7 @@ Düzenli güncelleme için isteğe bağlı olarak bir **cron job** ekleyebilirsi
 ![WhatsApp Badge](https://img.shields.io/badge/WhatsApp-Bot-25D366?logo=whatsapp&logoColor=white)
 
 Bu bot, WhatsApp üzerinden kullanıcılara **Hayalhanem YouTube videoları** ve **Risale-i Nur içerikleri** sunmak için geliştirilmiştir.  
-Kullanıcı mesajlarına yanıt verir, komutları algılar ve uygun içeriği döndürür.
+Kullanıcı mesajlarına yanıt verir, slash komutlarını ve doğal dilde yazılan istekleri algılar, ardından uygun içeriği gönderir.
 
 > 📏 **Uzun Mesaj Yönetimi:**  
 > WhatsApp’ın tek mesaj için koyduğu **4096 karakter sınırı** nedeniyle, bot uzun içerikleri **otomatik olarak parçalayarak birden fazla mesaj hâlinde** gönderir.  
@@ -61,23 +61,22 @@ Bot şu an **Risale-i Nur Sözler Kitabı'nı** içermektedir ve WhatsApp üzeri
 
 #### 💬 Komutlar
 
-Aşağıdaki tablo, botun desteklediği tüm komutları ve işlevlerini özetler:
+Aşağıdaki tablo, botun desteklediği tüm komutları ve örnek kullanımlarını gösterir:  
 
-
-| Komut / İfade                                                             | Açıklama                                                                                 |
-|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `/bilgi`                                                                  | Botun özelliklerini ve komut listesini gösterir.                                        |
-| `/kisavideo`                                                              | Kısa (≤ 90 sn) bir video önerir.                                                        |
-| **kısa video ile ilgili herhangi bir ifade**<br>örn: "kısa video öner", "bana kısa video gönder" | Slash komut yazmadan da **kısa video** isteği gönderir.                                 |
-| `/uzunvideo`                                                              | Uzun (> 90 sn) bir video önerir.                                                        |
-| **uzun video ile ilgili herhangi bir ifade**<br>örn: "uzun video öner", "uzun bir video istiyorum" | Slash komut yazmadan da **uzun video** isteği gönderir.                                 |
-| `/risale`                                                                 | Risale-i Nur Sözler Kitabı için yardım menüsünü gösterir.                               |
-| `/risaleicindekiler`                                                      | Tüm Sözler'in listesini ve sayfa bilgilerini gösterir.                                   |
-| `/risalekelimeler`                                                        | Sözler Kitabı'ndan rastgele 15 kelime ve anlamını getirir.                               |
-| `/risalesozler 9`                                                         | 9. Söz'ün ilk sayfasını açar (**varsayılan:** anlamlar açık).                          |
-| `/risalesozler 9 sayfa 2 kapalı`                                          | 9. Söz'ün 2. sayfasını açar, **anlamları gizler**.                          |
-| `/risalesozlersayfa 421`                                                  | **Sözler Kitabı'nın 421. sayfasını** açar (**varsayılan:** anlamlar açık).              |
-| **risale ile ilgili herhangi bir ifade**<br>örn: "risale sözler 9", "risale sözler 9 kapalı", "risale sözler sayfa 421" | Slash komut yazmadan da **Risale okuma** isteği gönderir. Anlam açık/kapalı ve sayfa belirtme desteklenir.</parameter>
+| Komut / İfade                                                           | Açıklama                                                                                                 |
+|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `/bilgi`                                                                | Botun özelliklerini, geliştirici bilgisini ve tüm komut listesini gösterir.                              |
+| `/hayalhanemkisavideo`                                                  | **Hayalhanem YouTube kanallarından** kısa (≤ 90 sn) bir video önerir.                                    |
+| **Kısa video isteği**<br>örn: “kısa video öner”, “bana kısa video gönder” | Doğal dil ile de kısa video isteği gönderebilirsiniz.                                               |
+| `/hayalhanemuzunvideo`                                                  | **Hayalhanem YouTube kanallarından** uzun (> 90 sn) bir video önerir.                                    |
+| **Uzun video isteği**<br>örn: “uzun video öner”, “uzun bir video istiyorum” | Doğal dil ile de uzun video isteği gönderebilirsiniz.                                               |
+| `/risale`                                                               | Risale-i Nur **Sözler Kitabı** için yardım menüsünü gösterir.                                            |
+| `/risaleicindekiler`                                                    | **Sözler Kitabı’nın içindekiler listesini** ve sayfa numaralarını gösterir.                               |
+| `/risalekelimeler`                                                      | Sözler Kitabı’ndan **rastgele 15 kelime** ve anlamlarını getirir.                                        |
+| `/risalesozler 9`                                                       | **9. Söz’ün ilk sayfasını** açar (**varsayılan:** anlamlar açık).                                        |
+| `/risalesozler 9 sayfa 2 kapalı`                                        | **9. Söz’ün 2. sayfasını** açar. **Anlamları kapalı olarak açar, bilinmeyen kelimeler sayfa sonunda listelenir.** |
+| `/risalesozlersayfa 421`                                                | **Sözler Kitabı’nın 421. sayfasını** açar (**varsayılan:** anlamlar açık).                               |
+| **Risale okuma isteği**<br>örn: “risale sözler 9”, “risale sözler 9 kapalı”, “risale sözler sayfa 421” | Doğal dil ile de Risale okuma isteği gönderebilirsiniz. Anlam açık/kapalı ve sayfa belirtme desteklenir. |
 
 ## 🧭 Yol Haritası
 

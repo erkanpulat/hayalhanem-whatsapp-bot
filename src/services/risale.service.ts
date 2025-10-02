@@ -254,7 +254,7 @@ export class RisaleService {
 			});
 
 			lines.push('');
-			lines.push('💡 Yeni kelimeler öğrenmeye devam etmek için komutu kullanabilir veya `risale kelimeler` yazabilirsiniz.');
+			lines.push('💡 Yeni kelimeler öğrenmeye devam etmek için komutu kullanabilir veya *_"risale kelimeler"_* yazabilirsiniz.');
 
 			return lines.join('\n');
 		} catch (error) {
@@ -292,16 +292,24 @@ export class RisaleService {
 				currentSozlerId = sozInfo.range.startId + (currentPage.pageIndex - 1);
 			}
 
+			const totalPages = await this.getTotalPageCount();
+
 			// Check if there's a next page in the same soz
 			if (currentPage.pageIndex < sozInfo.range.count) {
 				const nextPageNo = currentPage.pageIndex + 1;
 				const nextSozlerId = currentSozlerId + 1;
 
-				return {
+				const result: { command: string; description: string; sozlerCommand?: string } = {
 					command: `/risalesozler ${currentPage.sozNo} sayfa ${nextPageNo}`,
-					description: `${currentPage.sozNo}. Söz ${nextPageNo}. sayfasını açar`,
-					sozlerCommand: `/risalesozlersayfa ${nextSozlerId}`
+					description: `${currentPage.sozNo}. Söz ${nextPageNo}. sayfasını açar`
 				};
+
+				// Only add sozlerCommand if the next page exists in Sözler Kitabı
+				if (nextSozlerId <= totalPages) {
+					result.sozlerCommand = `/risalesozlersayfa ${nextSozlerId}`;
+				}
+
+				return result;
 			}
 
 			// Check if there's a next soz
@@ -312,11 +320,17 @@ export class RisaleService {
 				if (nextSoz) {
 					const nextSozlerId = currentSozlerId + 1;
 
-					return {
+					const result: { command: string; description: string; sozlerCommand?: string } = {
 						command: `/risalesozler ${nextSoz.sozNo}`,
-						description: `${nextSoz.sozNo}. Söz 1. sayfasını açar`,
-						sozlerCommand: `/risalesozlersayfa ${nextSozlerId}`
+						description: `${nextSoz.sozNo}. Söz 1. sayfasını açar`
 					};
+
+					// Only add sozlerCommand if the next page exists in Sözler Kitabı
+					if (nextSozlerId <= totalPages) {
+						result.sozlerCommand = `/risalesozlersayfa ${nextSozlerId}`;
+					}
+
+					return result;
 				}
 			}
 			// No next page/soz

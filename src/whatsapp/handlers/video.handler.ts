@@ -5,7 +5,6 @@ import { createVideoBlock } from '../utils.js';
 export async function handleVideoRequest(variant: Variant): Promise<string> {
 	try {
 		const video = await videoService.getRecommendation(variant);
-
 		if (!video) {
 			const videoType = variant === 'short' ? 'kısa' : 'uzun';
 			return `Şu an ${videoType} video bulamadım. Lütfen daha sonra tekrar deneyin.`;
