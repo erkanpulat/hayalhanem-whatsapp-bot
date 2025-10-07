@@ -18,4 +18,24 @@ export interface IncomingMessage {
 	name?: string;
 }
 
+export interface WhatsAppButton {
+	id: string;
+	title: string;
+	type: string;
+}
+
+export interface WhatsAppResponse {
+	text: string;
+	buttons?: WhatsAppButton[];
+	previewUrl?: boolean;
+}
+
+export interface CallbackData {
+	action: string;
+	sozNo?: number;
+	pageNo?: number;
+	sozlerPageId?: number;
+	showMeaning?: 'open' | 'closed';
+}
+
 export type DetectedIntent = 'short' | 'long' | 'info' | 'risale' | 'unknown';

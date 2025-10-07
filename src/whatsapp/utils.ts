@@ -1,7 +1,7 @@
-import type { VideoItem } from '../types/video.js';
+import type { VideoItem } from '../types/youtube.js';
 import type { MessageChunk } from '../types/whatsapp.js';
 import { sanitizeWhatsApp } from '../utils/text-utils.js';
-import { WHATSAPP_MESSAGE_MAX_LENGTH } from './api.js';
+import { WHATSAPP_CONFIG } from '../config/whatsapp.js';
 
 /**
  * Get Unicode-safe character count using grapheme clusters
@@ -17,7 +17,7 @@ export function getGraphemeLength(text: string): number {
  */
 export function splitTextSafely(
 	text: string,
-	maxLength: number = WHATSAPP_MESSAGE_MAX_LENGTH,
+	maxLength: number = WHATSAPP_CONFIG.MESSAGE_MAX_LENGTH,
 	addChunkLabels: boolean = true
 ): MessageChunk[] {
 	if (getGraphemeLength(text) <= maxLength) {
@@ -70,7 +70,7 @@ export function splitTextSafely(
  */
 export function splitTextIntelligently(
 	text: string,
-	maxLength: number = WHATSAPP_MESSAGE_MAX_LENGTH,
+	maxLength: number = WHATSAPP_CONFIG.MESSAGE_MAX_LENGTH,
 	addChunkLabels: boolean = true
 ): MessageChunk[] {
 	if (getGraphemeLength(text) <= maxLength) {
@@ -141,9 +141,9 @@ export function createVideoBlock(video: VideoItem): string {
 	const title = sanitizeWhatsApp(video.title || 'Başlıksız Video');
 
 	const parts = [
-		`🎬 *Video adı:* *${title}*`,
+		`🎬 *Video Adı:* *${title}*`,
 		'',
-		`🔗 *Video linki:* ${video.url || ''}`
+		`🔗 *Video Linki:* ${video.url || ''}`
 	];
 
 	// Add description if available

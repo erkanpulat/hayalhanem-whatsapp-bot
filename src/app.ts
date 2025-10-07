@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { whatsappRouter } from './whatsapp/router.js';
+import { SERVER_CONFIG } from './config/server.js';
 
 export function createApp() {
 	const app = express();
@@ -10,7 +11,7 @@ export function createApp() {
 	app.use('/webhook', whatsappRouter);
 
 	app.get('/', function (req, res) {
-		res.send(`${process.env.APP_NAME} is running! ✅`);
+		res.send(`${SERVER_CONFIG.APP_NAME} is running! ✅`);
 	});
 
 	return app;

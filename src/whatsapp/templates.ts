@@ -3,18 +3,11 @@
  * 
  * This file contains shared message templates and building blocks
  */
-import { consumeSpecialMessageFIFO, videoService } from '../services/video.service.js';
+import { consumeSpecialMessageFIFO, youtubeService } from '../services/youtube.service.js';
 import { sanitizeWhatsApp } from '../utils/text-utils.js';
 import { createVideoBlock } from './utils.js';
-
-const SPECIAL_MESSAGES_ENABLED = process.env.SPECIAL_MESSAGES_ENABLED === 'true';
-
-const TIME_GREETINGS = {
-	MORNING: { start: 5, end: 12, message: 'Hayırlı sabahlar dilerim. 🌅' },
-	DAY: { start: 12, end: 18, message: 'Hayırlı günler dilerim. ☀️' },
-	EVENING: { start: 18, end: 23, message: 'Hayırlı akşamlar dilerim. 🌇' },
-	NIGHT: { message: 'Hayırlı geceler dilerim. 🌙' }
-} as const;
+import { WHATSAPP_CONFIG } from '../config/whatsapp.js';
+import { TIME_GREETINGS, RESPONSE_MESSAGES } from './constants.js';
 
 /**
  * Standard greeting with time-based message
@@ -37,7 +30,7 @@ export function createBotIntro(): string {
  * Special message section (if available)
  */
 export async function createSpecialMessageSection(from: string): Promise<string> {
-	if (!SPECIAL_MESSAGES_ENABLED) {
+	if (!WHATSAPP_CONFIG.FEATURES.SPECIAL_MESSAGES_ENABLED) {
 		return '';
 	}
 
@@ -83,7 +76,6 @@ export function createCommandsSection(): string {
 		'ℹ️ *Genel:*',
 		'• `/bilgi` → Bot hakkında bilgi ve komut listesini gösterir.',
 		'',
-		'✨ İpucu: Slash komutlarını yazmak zorunda değilsin; doğal dilde konuşman da yeterli!'
 	].join('\n');
 }
 
@@ -122,7 +114,7 @@ export async function buildWelcomeMessage(
 		parts.push(createDefaultContentIntro());
 
 		// Try to get a short video for new users
-		const shortVideo = await videoService.getRecommendation('short');
+		const shortVideo = await youtubeService.getRecommendation('short');
 		if (shortVideo) {
 			parts.push('', createVideoBlock(shortVideo));
 		} else {
@@ -179,6 +171,27 @@ export function unknownCommandText(): string {
 	].join('\n');
 }
 
+/**
+ * Bot information and developer contact details
+ */
+export function createInfoContent(): string {
+	return [
+		'🤖 *Ben, Hayalhanem YouTube kanallarından videolar öneren ve Risale-i Nur Sözler Kitabı’ndan okumalar sunan bir sohbet robotuyum!*',
+		'',
+		'✨ Bu benim henüz ilk sürümüm ve hâlâ geliştirilmeye devam ediyorum.',
+		'🛠️ Tamamen gönüllülük esasıyla *Erkan Pulat* tarafından açık kaynaklı bir proje olarak geliştiriliyorum.',
+		'📬 Hata ya da önerilerini iletmek veya projeye katkı sağlamak istersen:',
+		'👉 dryapptr@gmail.com adresinden bize ulaşabilirsin.',
+		'',
+		'🎬 *Neler yapabilirim:*',
+		'• *Hayalhanem YouTube kanallarından* 90 saniyeye kadar *kısa video* önerebilirim.',
+		'• *Hayalhanem YouTube kanallarından* 90 saniyeden *uzun video* önerebilirim.',
+		'• *Risale-i Nur Sözler Kitabı’ndan* sayfa sayfa okuma yapmanı *kolayca sağlayabilirim.*',
+		'• Risale’de *anlam açık* veya *anlam kapalı* okuma yapabilir; *anlam kapalı* modunda bilinmeyen kelimeleri sayfa sonunda gösterebilirim.',
+		'• Risale-i Nur *Sözler Kitabı’ndan* rastgele 15 kelime seçerek kelime çalışması yapmanı sağlayabilirim.',
+	].join('\n');
+}
+
 function greetingByHour(d: Date): string {
 	const h = getHourTR(d);
 
@@ -205,23 +218,3 @@ function getHourTR(d: Date): number {
 	return parseInt(fmt.format(d), 10);
 }
 
-/**
- * Bot information and developer contact details
- */
-export function createInfoContent(): string {
-	return [
-		'🤖 *Ben, Hayalhanem YouTube kanallarından videolar öneren ve Risale-i Nur Sözler Kitabı’ndan okumalar sunan bir sohbet robotuyum!*',
-		'',
-		'✨ Bu benim henüz ilk sürümüm ve hâlâ geliştirilmeye devam ediyorum.',
-		'🛠️ Tamamen gönüllülük esasıyla *Erkan Pulat* tarafından açık kaynaklı bir proje olarak geliştiriliyorum.',
-		'📬 Hata ya da önerilerini iletmek veya projeye katkı sağlamak istersen:',
-		'👉 dryapptr@gmail.com adresinden bize ulaşabilirsin.',
-		'',
-		'🎬 *Neler yapabilirim:*',
-		'• *Hayalhanem YouTube kanallarından* 90 saniyeye kadar *kısa video* önerebilirim.',
-		'• *Hayalhanem YouTube kanallarından* 90 saniyeden *uzun video* önerebilirim.',
-		'• *Risale-i Nur Sözler Kitabı’ndan* sayfa sayfa okuma yapmanı *kolayca sağlayabilirim.*',
-		'• Risale’de *anlam açık* veya *anlam kapalı* okuma yapabilir; *anlam kapalı* modunda bilinmeyen kelimeleri sayfa sonunda gösterebilirim.',
-		'• Risale-i Nur *Sözler Kitabı’ndan* rastgele 15 kelime seçerek kelime çalışması yapmanı sağlayabilirim.',
-	].join('\n');
-}

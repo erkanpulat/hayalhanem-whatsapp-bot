@@ -1,12 +1,8 @@
 import axios from 'axios';
-
-const API_KEY = process.env.YOUTUBE_API_KEY;
-if (!API_KEY) {
-	throw new Error('❌ YOUTUBE_API_KEY environment variable not set!');
-}
+import { YOUTUBE_CONFIG } from '../config/youtube.js';
 
 export const yt = axios.create({
-	baseURL: 'https://www.googleapis.com/youtube/v3',
-	params: { key: API_KEY },
-	timeout: 10_000
+	baseURL: YOUTUBE_CONFIG.BASE_URL,
+	params: { key: YOUTUBE_CONFIG.API_KEY },
+	timeout: YOUTUBE_CONFIG.TIMEOUT
 });

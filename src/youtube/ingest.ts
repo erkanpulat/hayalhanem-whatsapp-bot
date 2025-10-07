@@ -1,9 +1,9 @@
 import type { PlaylistItemRef, VideoRecord } from '../types/youtube.js';
 import { yt } from './client.js';
 import { isoDurationToSeconds, getVideoUrl } from './utils.js';
+import { YOUTUBE_CONFIG } from '../config/youtube.js';
 
-const PLAYLIST_ITEMS_BATCH_SIZE = 50;
-const VIDEO_DETAILS_BATCH_SIZE = 50;
+const { PLAYLIST_ITEMS, VIDEO_DETAILS } = YOUTUBE_CONFIG.BATCH_SIZES;
 
 export async function getUploadsPlaylistId(channelId: string): Promise<string> {
 	try {
@@ -49,7 +49,7 @@ export async function listAllPlaylistItems(
 				params: {
 					part: 'snippet,contentDetails',
 					playlistId,
-					maxResults: PLAYLIST_ITEMS_BATCH_SIZE,
+					maxResults: PLAYLIST_ITEMS,
 					...(pageToken ? { pageToken } : {})
 				}
 			});
@@ -105,10 +105,10 @@ export async function hydrateVideoDetails(videoIds: string[]): Promise<VideoReco
 	let processedCount = 0;
 
 	try {
-		for (let i = 0; i < videoIds.length; i += VIDEO_DETAILS_BATCH_SIZE) {
-			const batch = videoIds.slice(i, i + VIDEO_DETAILS_BATCH_SIZE);
-			const batchNumber = Math.floor(i / VIDEO_DETAILS_BATCH_SIZE) + 1;
-			const totalBatches = Math.ceil(videoIds.length / VIDEO_DETAILS_BATCH_SIZE);
+		for (let i = 0; i < videoIds.length; i += VIDEO_DETAILS) {
+			const batch = videoIds.slice(i, i + VIDEO_DETAILS);
+			const batchNumber = Math.floor(i / VIDEO_DETAILS) + 1;
+			const totalBatches = Math.ceil(videoIds.length / VIDEO_DETAILS);
 
 			console.log(`   📦 Batch ${batchNumber}/${totalBatches}: processing ${batch.length} videos`);
 
@@ -117,7 +117,7 @@ export async function hydrateVideoDetails(videoIds: string[]): Promise<VideoReco
 					params: {
 						part: 'contentDetails,snippet',
 						id: batch.join(','),
-						maxResults: VIDEO_DETAILS_BATCH_SIZE
+						maxResults: VIDEO_DETAILS
 					}
 				});
 

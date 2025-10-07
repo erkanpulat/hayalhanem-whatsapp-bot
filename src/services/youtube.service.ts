@@ -1,12 +1,8 @@
-import { resolve } from 'node:path';
-
 import { atomicWrite, readJsonSafe } from '../utils/file-ops.js';
-import type { Variant, VideoItem, SpecialMessageMap } from '../types/video.js';
+import type { Variant, VideoItem, SpecialMessageMap } from '../types/youtube.js';
+import { YT_DATA_FILES, WA_DATA_FILES } from '../config/paths.js';
 
-const DATA_DIR = resolve(process.cwd(), 'data');
-const SPECIAL_MESSAGES_PATH = resolve(DATA_DIR, 'special-messages.json');
-
-export class VideoService {
+export class YouTubeService {
 	/**
 	 * Load video list by variant
 	 */
@@ -16,7 +12,7 @@ export class VideoService {
 		}
 
 		try {
-			const filePath = resolve(DATA_DIR, `${variant}.json`);
+			const filePath = variant === 'short' ? YT_DATA_FILES.SHORT_VIDEOS : YT_DATA_FILES.LONG_VIDEOS;
 			const data = await readJsonSafe(filePath, []);
 
 			return this.validateVideoList(data, variant);
@@ -44,7 +40,7 @@ export class VideoService {
 	 */
 	async loadSpecialMessages(): Promise<SpecialMessageMap> {
 		try {
-			const data = await readJsonSafe(SPECIAL_MESSAGES_PATH, {});
+			const data = await readJsonSafe(WA_DATA_FILES.SPECIAL_MESSAGES, {});
 			return this.normalizeSpecialMessages(data);
 		} catch (error) {
 			console.error('❌ Error loading special messages:', error);
@@ -90,7 +86,7 @@ export class VideoService {
 	private async saveSpecialMessages(map: SpecialMessageMap): Promise<void> {
 		try {
 			const cleanedMap = this.cleanEmptyQueues(map);
-			await atomicWrite(SPECIAL_MESSAGES_PATH, cleanedMap);
+			await atomicWrite(WA_DATA_FILES.SPECIAL_MESSAGES, cleanedMap);
 		} catch (error) {
 			console.error('❌ Error saving special messages:', error);
 			throw error;
@@ -173,9 +169,9 @@ export class VideoService {
 }
 
 // Default instance for convenience
-export const videoService = new VideoService();
+export const youtubeService = new YouTubeService();
 
 // Convenience function exports
 export async function consumeSpecialMessageFIFO(from: string): Promise<string | null> {
-	return videoService.consumeSpecialMessageFIFO(from);
+	return youtubeService.consumeSpecialMessageFIFO(from);
 }

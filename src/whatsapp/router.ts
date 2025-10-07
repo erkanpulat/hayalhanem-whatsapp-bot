@@ -1,12 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 
-import { sendTextMessage } from './api.js';
-import { handleIncoming } from './logic.js';
-
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
-if (!VERIFY_TOKEN) {
-	throw new Error('❌ WHATSAPP_VERIFY_TOKEN environment variable not set');
-}
+import { sendTextMessage, sendButtonMessage, sendVideoButtonMessage } from './api.js';
+import { handleIncoming, handleCallback } from './logic.js';
+import { WHATSAPP_CONFIG } from '../config/whatsapp.js';
 
 export const whatsappRouter = Router();
 
@@ -22,7 +18,7 @@ whatsappRouter.get('/', (req: Request, res: Response) => {
 
 	console.log('📥 Webhook verification request:', { mode, token: token ? '***' : 'missing' });
 
-	if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+	if (mode === 'subscribe' && token === WHATSAPP_CONFIG.VERIFY_TOKEN) {
 		console.log('✅ Webhook verification successful');
 		return res.status(200).send(challenge);
 	}
@@ -90,10 +86,23 @@ async function processMessage(
 	const messageId = message?.id as string | undefined;
 	const from = message?.from as string | undefined;
 	const text = message?.text?.body as string | undefined;
+	const buttonReply = message?.interactive?.button_reply;
 	const timestamp = Number(message?.timestamp ?? Date.now() / 1000);
 
-	if (!messageId || !from || !text) {
-		console.warn('⚠️ Invalid message data:', { messageId, from, hasText: !!text });
+	if (!messageId || !from) {
+		console.warn('⚠️ Invalid message data:', { messageId, from });
+		return;
+	}
+
+	// Handle button callback
+	if (buttonReply) {
+		await processButtonCallback(message, phoneNumberId);
+		return;
+	}
+
+	// Handle regular text message
+	if (!text) {
+		console.warn('⚠️ No text in message:', { messageId, from });
 		return;
 	}
 
@@ -103,7 +112,7 @@ async function processMessage(
 	}
 
 	// Memory management for processedIds
-	if (processedIds.size >= 10_000) {
+	if (processedIds.size >= WHATSAPP_CONFIG.MEMORY.PROCESSED_IDS_MAX_SIZE) {
 		console.log('🧹 Cleaning processed IDs cache');
 		processedIds.clear();
 	}
@@ -111,19 +120,102 @@ async function processMessage(
 	processedIds.add(messageId);
 
 	try {
-		const { response, previewUrl } = await handleIncoming({
+		const result = await handleIncoming({
 			from,
 			text,
 			timestamp: timestamp * 1000, // Convert to milliseconds
 			...(contactName && { name: contactName })
 		});
-		await sendTextMessage({
-			to: from,
-			body: response,
-			phoneNumberId,
-			preview_url: previewUrl
-		});
+
+		if (result.buttons && result.buttons.length > 0) {
+			// Check if this is a video message (contains YouTube URL)
+			const isVideoMessage = result.text.includes('youtube.com') || result.text.includes('youtu.be');
+
+			if (isVideoMessage) {
+				await sendVideoButtonMessage({
+					to: from,
+					body: result.text,
+					phoneNumberId,
+					buttons: result.buttons,
+					preview_url: result.previewUrl ?? true
+				});
+			} else {
+				await sendButtonMessage({
+					to: from,
+					body: result.text,
+					phoneNumberId,
+					buttons: result.buttons,
+					preview_url: result.previewUrl ?? false
+				});
+			}
+		} else {
+			await sendTextMessage({
+				to: from,
+				body: result.text,
+				phoneNumberId,
+				preview_url: result.previewUrl ?? false
+			});
+		}
 	} catch (error) {
 		console.error(`❌ Failed to process message ${messageId} from ${from}:`, error);
+	}
+}
+
+async function processButtonCallback(
+	message: any,
+	phoneNumberId: string
+): Promise<void> {
+	const messageId = message?.id as string | undefined;
+	const from = message?.from as string | undefined;
+	const buttonReply = message?.interactive?.button_reply;
+	const callbackId = buttonReply?.id as string | undefined;
+
+	if (!messageId || !from || !callbackId) {
+		console.warn('⚠️ Invalid button callback data:', { messageId, from, callbackId });
+		return;
+	}
+
+	if (processedIds.has(messageId)) {
+		console.log(`🔄 Skipping duplicate button callback: ${messageId}`);
+		return;
+	}
+
+	processedIds.add(messageId);
+
+	try {
+		console.log(`📱 Processing button callback: ${callbackId} from ${from}`);
+		const result = await handleCallback(callbackId);
+
+		if (result.buttons && result.buttons.length > 0) {
+			// Check if this is a video message (contains YouTube URL)
+			const isVideoMessage = result.text.includes('youtube.com') || result.text.includes('youtu.be');
+
+			if (isVideoMessage) {
+				await sendVideoButtonMessage({
+					to: from,
+					body: result.text,
+					phoneNumberId,
+					buttons: result.buttons,
+					preview_url: result.previewUrl ?? true
+				});
+			} else {
+				await sendButtonMessage({
+					to: from,
+					body: result.text,
+					phoneNumberId,
+					buttons: result.buttons,
+					preview_url: result.previewUrl ?? false
+				});
+			}
+		} else {
+			await sendTextMessage({
+				to: from,
+				body: result.text,
+				phoneNumberId,
+				preview_url: result.previewUrl ?? false
+			});
+		}
+	} catch (error) {
+		console.error(`❌ Failed to process button callback ${callbackId} from ${from}:`, error);
 	}
 }

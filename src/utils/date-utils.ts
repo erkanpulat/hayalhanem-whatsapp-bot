@@ -12,9 +12,9 @@ export function toISO(date: number | string | Date): string {
 export function isoDurationToSeconds(iso: string | undefined | null): number {
 	const match = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso ?? '');
 	if (!match) return 0;
-	
+
 	const [, hours, minutes, seconds] = match;
-	
+
 	return (Number(hours ?? 0) * 3600) + (Number(minutes ?? 0) * 60) + Number(seconds ?? 0);
 }
 
@@ -26,11 +26,11 @@ export function secondsToHumanDuration(seconds: number): string {
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const secs = seconds % 60;
-	
+
 	const parts = [];
 	if (hours > 0) parts.push(`${hours}h`);
 	if (minutes > 0) parts.push(`${minutes}m`);
 	if (secs > 0) parts.push(`${secs}s`);
-	
+
 	return parts.length > 0 ? parts.join(' ') : '0s';
 }

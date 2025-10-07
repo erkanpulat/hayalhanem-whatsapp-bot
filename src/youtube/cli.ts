@@ -1,6 +1,4 @@
 import 'dotenv/config';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import type { VideoRecordWithFetch, CursorMap, VideoRecord } from '../types/youtube.js';
 import {
@@ -10,16 +8,10 @@ import {
 } from './ingest.js';
 import { classify, toISO } from './utils.js';
 import { atomicWrite, ensureDir, readJsonSafe } from '../utils/file-ops.js';
+import { YOUTUBE_CONFIG } from '../config/youtube.js';
+import { DATA_DIR, YT_DATA_FILES } from '../config/paths.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..', '..');
-const DATA_DIR = resolve(ROOT, 'data');
-const SHORT_PATH = resolve(DATA_DIR, 'short.json');
-const LONG_PATH = resolve(DATA_DIR, 'long.json');
-const CURSOR_PATH = resolve(DATA_DIR, 'fetch-cursor.json');
-const BACKOFF_MS = 30 * 60 * 1000; // 30 minutes
-
-const CHANNEL_IDS = getChannelIds();
+const CHANNEL_IDS = YOUTUBE_CONFIG.CHANNEL_IDS;
 
 class VideoFetcher {
 	private seenIds = new Set<string>();
@@ -49,9 +41,9 @@ class VideoFetcher {
 
 	private async loadExistingData() {
 		const [shortList, longList, cursor] = await Promise.all([
-			readJsonSafe<VideoRecordWithFetch[]>(SHORT_PATH, []),
-			readJsonSafe<VideoRecordWithFetch[]>(LONG_PATH, []),
-			readJsonSafe<CursorMap>(CURSOR_PATH, {}),
+			readJsonSafe<VideoRecordWithFetch[]>(YT_DATA_FILES.SHORT_VIDEOS, []),
+			readJsonSafe<VideoRecordWithFetch[]>(YT_DATA_FILES.LONG_VIDEOS, []),
+			readJsonSafe<CursorMap>(YT_DATA_FILES.FETCH_CURSOR, {}),
 		]);
 
 		return { shortList, longList, cursor };
@@ -107,7 +99,7 @@ class VideoFetcher {
 	private calculateStopTime(lastPublishedAt?: string): string {
 		if (!lastPublishedAt) return '';
 
-		const t = new Date(lastPublishedAt).getTime() - BACKOFF_MS;
+		const t = new Date(lastPublishedAt).getTime() - YOUTUBE_CONFIG.TIME.BACKOFF_MS;
 		return toISO(Math.max(0, t));
 	}
 
@@ -197,16 +189,16 @@ class VideoFetcher {
 		longList.sort(sortByDate);
 
 		await Promise.all([
-			atomicWrite(SHORT_PATH, shortList),
-			atomicWrite(LONG_PATH, longList),
-			atomicWrite(CURSOR_PATH, cursor),
+			atomicWrite(YT_DATA_FILES.SHORT_VIDEOS, shortList),
+			atomicWrite(YT_DATA_FILES.LONG_VIDEOS, longList),
+			atomicWrite(YT_DATA_FILES.FETCH_CURSOR, cursor),
 		]);
 	}
 
 	private printSummary(): void {
 		console.log('\n✅ Done.');
 		console.log(`   Total new: short ${this.stats.totalNewShort}, long ${this.stats.totalNewLong}`);
-		console.log(`   Files:\n     - ${SHORT_PATH}\n     - ${LONG_PATH}\n     - ${CURSOR_PATH}`);
+		console.log(`   Files:\n     - ${YT_DATA_FILES.SHORT_VIDEOS}\n     - ${YT_DATA_FILES.LONG_VIDEOS}\n     - ${YT_DATA_FILES.FETCH_CURSOR}`);
 	}
 
 	private handleError(error: unknown): never {
@@ -214,32 +206,6 @@ class VideoFetcher {
 		console.error('❌ Fatal:', data);
 		process.exit(1);
 	}
-}
-
-function getChannelIds(): readonly string[] {
-	const channelIds = process.env.YOUTUBE_CHANNEL_IDS;
-
-	if (!channelIds) {
-		throw new Error('❌ YOUTUBE_CHANNEL_IDS environment variable not set!');
-	}
-
-	const ids = channelIds.split(',').map(id => id.trim()).filter(Boolean);
-
-	// Validate YouTube channel ID format
-	const validPattern = /^UC[a-zA-Z0-9_-]{22}$/;
-	const invalidIds = ids.filter(id => !validPattern.test(id));
-
-	if (invalidIds.length) {
-		throw new Error(`❌ Invalid YouTube channel IDs: ${invalidIds.join(', ')}`);
-	}
-
-	if (!ids.length) {
-		throw new Error('❌ No valid channel IDs found in YOUTUBE_CHANNEL_IDS');
-	}
-
-	console.log(`📺 Loaded ${ids.length} channels to fetch videos from`);
-
-	return ids;
 }
 
 // Main execution

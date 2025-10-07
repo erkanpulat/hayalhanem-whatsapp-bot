@@ -1,12 +1,11 @@
 import type { VideoRecord } from '../types/youtube.js';
 import { toISO, isoDurationToSeconds } from '../utils/date-utils.js';
-
-const SHORT_THRESHOLD_SEC = 90;
+import { YOUTUBE_CONFIG } from '../config/youtube.js';
 
 export { toISO, isoDurationToSeconds };
 
 export function isShort(durationSec: number): boolean {
-	return durationSec <= SHORT_THRESHOLD_SEC;
+	return durationSec <= YOUTUBE_CONFIG.SHORT_THRESHOLD_SEC;
 }
 
 export function classify(rec: VideoRecord): 'short' | 'long' {
