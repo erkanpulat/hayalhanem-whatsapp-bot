@@ -86,3 +86,9 @@ Aşağıdaki tablo, botun desteklediği tüm komutları ve örnek kullanımları
 - 🤖 **Yapay Zekâ Destekli Öneriler:**  
   Mesaj içeriğine göre **akıllı video ve metin önerileri** sunan yapay zekâ modülünün eklenmesi.
 
+## 🎥 Tanıtım Videosu
+
+https://github.com/user-attachments/assets/b58ec235-037e-4186-b07b-c114ba764d08
+
+
+
