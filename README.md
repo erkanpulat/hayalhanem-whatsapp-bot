@@ -7,6 +7,17 @@
 📜 [Komutlar listesine git](#-komutlar)
 
 ---
+## İçindekiler
+
+- [📌 Proje Özellikleri](#-proje-özellikleri)
+- [🎬 YouTube Entegrasyonu](#-youtube-entegrasyonu)
+- [🤖 WhatsApp Botu](#-whatsapp-botu)
+- [📖 Risale-i Nur Külliyatı](#-risale-i-nur-külliyatı)
+- [💬 Komutlar](#-komutlar)
+- [🧭 Yol Haritası](#-yol-haritası)
+- [🎥 Tanıtım Videosu](#-tanıtım-videosu)
+
+---
 ## 📌 Proje Özellikleri
 
 ### 🎬 YouTube Entegrasyonu
